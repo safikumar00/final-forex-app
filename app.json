@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "bolt-expo-nativewind",
+    "slug": "bolt-expo-nativewind",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "notification": {
+      "vapidPublicKey": "BFF8LCxcGGfvgAsQmV8P8brjmqCae77Hm3f19qjIiIP6KDlQHeyra19moyecFRgZNjaKwjKEq4sDJLxvmwXBq2Q"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      "expo-notifications",
+      "expo-secure-store"
+    ],
+    "android": {
+      "package": "com.safikumar00.boltexponativewind",
+      "useNextNotificationsApi": true
+    },
+    "extra": {
+      "router": {},
+      "apiUrl": "https://govngwsrefzqnuczhzdi.supabase.co",
+      "eas": {
+        "projectId": "8ce373b5-978a-43ad-a4cb-3ad8feb6e149"
+      }
+    },
+    "owner": "safikumar00",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8ce373b5-978a-43ad-a4cb-3ad8feb6e149"
+    }
+  }
+}
