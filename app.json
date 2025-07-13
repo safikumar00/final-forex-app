@@ -28,7 +28,9 @@
     ],
     "android": {
       "package": "com.safikumar00.boltexponativewind",
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "versionCode": 2,
+      "icon": "./assets/images/icon.png"
     },
     "extra": {
       "router": {},

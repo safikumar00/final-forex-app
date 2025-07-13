@@ -42,6 +42,7 @@ interface FCMv1Message {
         color?: string;
         sound?: string;
         click_action?: string;
+        image?: string;
       };
       data?: Record<string, string>;
     };
@@ -166,6 +167,7 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
 
     const results = [];
 
+
     // Send to each token individually (FCM v1 doesn't support batch sending)
     for (const token of tokens) {
       const message: FCMv1Message = {
@@ -195,9 +197,10 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
           },
           android: {
             notification: {
-              icon: 'ic_notification',
+              icon: 'ic_notification', // ✅ Should match a drawable asset in `android/app/src/main/res/drawable/`
               color: '#31954b',
               sound: 'default',
+              image: notification.imageUrl, // ✅ Add this field with a valid image URL
               click_action: 'FLUTTER_NOTIFICATION_CLICK',
             },
             data: {
