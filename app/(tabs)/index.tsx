@@ -18,8 +18,7 @@ import AssetSwitcher from '../../components/AssetSwitcher';
 import TimeframeSwitcher from '../../components/TimeframeSwitcher';
 import ConnectionStatus from '@/components/ConnectionStatus';
 import MarketOverview from '@/components/MarketOverview';
-import NotificationSheet from '@/components/NotificationSheet';
-import SetupGuide from '@/components/SetupGuide';
+import AboutAppSection from '@/components/AboutAppSection';
 import { fetchMarketData, fetchTechnicalIndicators, fetchEconomicEvents, MarketData, TechnicalIndicator, EconomicEvent } from '../../lib/database';
 import { getForexPrice } from '../../lib/forex';
 import { fetchPriceSummary } from '../../lib/database';
@@ -56,8 +55,6 @@ export default function HomeScreen() {
   const { t } = useLanguage();
   const [selectedAsset, setSelectedAsset] = useState<'XAU/USD' | 'BTC/USD'>('XAU/USD');
   const [timeframe, setTimeframe] = useState('1H');
-  const [setupGuideVisible, setSetupGuideVisible] = useState(false);
-  const [notificationVisible, setNotificationVisible] = useState(false);
   const [marketData, setMarketData] = useState<MarketData[]>([]);
   const [technicalIndicators, setTechnicalIndicators] = useState<TechnicalIndicator[]>([]);
   const [economicEvents, setEconomicEvents] = useState<EconomicEvent[]>([]);
@@ -395,16 +392,6 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>{t('homeSubtitle')}</Text>
         </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.actionButton}
-            onPress={() => setSetupGuideVisible(true)}
-          >
-            <Settings2 size={24} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}
-            onPress={() => setNotificationVisible(true)}
-          >
-            <Bell size={24} color={colors.text} />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -517,17 +504,11 @@ export default function HomeScreen() {
             ))}
           </View>
         </View>
+
+
+        {/* About App Section */}
+        <AboutAppSection />
       </ScrollView>
-
-      <NotificationSheet
-        visible={notificationVisible}
-        onClose={() => setNotificationVisible(false)}
-      />
-
-      <SetupGuide
-        visible={setupGuideVisible}
-        onClose={() => setSetupGuideVisible(false)}
-      />
     </SafeAreaView>
   );
 }
