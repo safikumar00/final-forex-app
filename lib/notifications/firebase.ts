@@ -1,87 +1,84 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, onMessage, getToken as getWebToken } from 'firebase/messaging'; // Web SDK
 import { Platform } from 'react-native';
 
 // Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: `${process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: `${process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-};
+// const firebaseConfig = {
+//   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+//   authDomain: `${process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+//   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+//   storageBucket: `${process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`,
+//   messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+//   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+// };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Cloud Messaging and get a reference to the service
-let messaging: any = null;
+let webMessaging: any = null;
 
 if (Platform.OS === 'web') {
-  try {
-    messaging = getMessaging(app);
+  const firebaseConfig = {
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: `${process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: `${process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`,
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  };
 
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .then((registration) => {
-          // console.log('✅ Service Worker registered successfully:', registration);
-        })
-        .catch((error) => {
-          // console.error('❌ Service Worker registration failed:', error);
-        });
-    }
-  } catch (error) {
-    // console.log('Firebase messaging not available:', error);
+  const app = initializeApp(firebaseConfig);
+  webMessaging = getMessaging(app);
+
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => { });
   }
 }
 
-export { messaging };
+export { webMessaging };
 
-// Get FCM token for web
+// 🔄 Final FCM Token function for both platforms
 export async function getFCMToken(): Promise<string | null> {
-  if (Platform.OS !== 'web' || !messaging) {
-    return null;
-  }
-
   try {
-    // Request notification permission first
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      // console.warn('Notification permission not granted');
-      return null;
+    if (Platform.OS === 'web') {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return null;
+
+      const vapidKey = process.env.EXPO_PUBLIC_FIREBASE_VAPID_KEY;
+      if (!vapidKey || !webMessaging) return null;
+
+      const registration = await navigator.serviceWorker.ready;
+
+      const token = await getWebToken(webMessaging, {
+        vapidKey,
+        serviceWorkerRegistration: registration,
+      });
+
+      return token;
     } else {
-      // console.log('Notification permission granted');
+      // Native (Android/iOS via @react-native-firebase)
+      const { default: messaging } = await import('@react-native-firebase/messaging');
+
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (!enabled) return null;
+
+      const token = await messaging().getToken();
+      return token;
     }
-
-    const vapidKey = process.env.EXPO_PUBLIC_FIREBASE_VAPID_KEY;
-    if (!vapidKey) {
-      // console.warn('VAPID key not configured for web push notifications');
-      return null;
-    }
-
-    // Wait for service worker to be ready
-    const registration = await navigator.serviceWorker.ready;
-
-    const token = await getToken(messaging, {
-      vapidKey,
-      serviceWorkerRegistration: registration
-    });
-
-    // console.log("✅ FCM Token generated:", token);
-    return token;
   } catch (error) {
-    // console.error('❌ Error getting FCM token:', error);
+    console.error('❌ Error getting FCM token:', error);
     return null;
   }
 }
+
 
 // Listen for foreground messages (web only)
 export function onForegroundMessage(callback: (payload: any) => void) {
-  if (Platform.OS !== 'web' || !messaging) {
+  if (Platform.OS !== 'web' || !webMessaging) {
     return () => { };
   }
 
-  return onMessage(messaging, callback);
+  return onMessage(webMessaging, callback);
 }
