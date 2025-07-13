@@ -74,7 +74,60 @@ self.addEventListener('notificationclick', (event) => {
 
   event.notification.close();
 
-  const { action, data } = event;
+  const { action } = event;
+  const data = event.notification.data || {};
+
+  // Log notification click event if we have the required data
+  if (data?.notification_id && data?.user_id) {
+    console.log('📊 Logging notification click event');
+    
+    // Log the click event (fire and forget - don't block the main action)
+    fetch(`${self.location.origin.replace('localhost:8081', 'govngwsrefzqnuczhzdi.supabase.co')}/functions/v1/log-notification-event`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        notification_id: data.notification_id,
+        user_id: data.user_id,
+        event_type: 'clicked',
+      }),
+    }).then(response => {
+      if (response.ok) {
+        console.log('✅ Notification click logged successfully');
+      } else {
+        console.warn('⚠️ Failed to log notification click:', response.status);
+      }
+    }).catch(err => {
+      console.error('⚠️ Error logging notification click:', err);
+    });
+  }
+
+  // Log notification click event if we have the required data
+  if (data?.notification_id && data?.user_id) {
+    console.log('📊 Logging notification click event');
+    
+    // Log the click event (fire and forget - don't block the main action)
+    fetch(`${self.location.origin.replace('localhost:8081', 'govngwsrefzqnuczhzdi.supabase.co')}/functions/v1/log-notification-event`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        notification_id: data.notification_id,
+        user_id: data.user_id,
+        event_type: 'clicked',
+      }),
+    }).then(response => {
+      if (response.ok) {
+        console.log('✅ Notification click logged successfully');
+      } else {
+        console.warn('⚠️ Failed to log notification click:', response.status);
+      }
+    }).catch(err => {
+      console.error('⚠️ Error logging notification click:', err);
+    });
+  }
 
   // Handle different actions
   if (action === 'view' || !action) {

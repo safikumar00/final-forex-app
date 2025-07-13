@@ -5,3 +5,4 @@ export * from './userProfile';
 export * from './firebase';
 export * from './silent';
 export * from './permissions';
+export * from './analytics';

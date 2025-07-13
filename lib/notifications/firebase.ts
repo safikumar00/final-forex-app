@@ -80,5 +80,22 @@ export function onForegroundMessage(callback: (payload: any) => void) {
     return () => { };
   }
 
-  return onMessage(webMessaging, callback);
+  return onMessage(webMessaging, (payload) => {
+    console.log('📨 Foreground message received:', payload);
+    
+    // Log view event for foreground notifications
+    if (payload.data?.notification_id && payload.data?.user_id) {
+      import('./analytics').then(({ logNotificationEvent }) => {
+        logNotificationEvent(
+          payload.data.user_id,
+          payload.data.notification_id,
+          'viewed'
+        ).catch(err => {
+          console.error('⚠️ Error logging foreground notification view:', err);
+        });
+      });
+    }
+    
+    callback(payload);
+  });
 }
