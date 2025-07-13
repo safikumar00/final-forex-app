@@ -200,7 +200,7 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
               icon: 'ic_notification', // ✅ Should match a drawable asset in `android/app/src/main/res/drawable/`
               color: '#31954b',
               sound: 'default',
-              image: notification.imageUrl, // ✅ Add this field with a valid image URL
+              image: 'https://static.vecteezy.com/system/resources/previews/005/076/592/non_2x/hacker-mascot-for-sports-and-esports-logo-free-vector.jpg', // ✅ Add this field with a valid image URL
               click_action: 'FLUTTER_NOTIFICATION_CLICK',
             },
             data: {
