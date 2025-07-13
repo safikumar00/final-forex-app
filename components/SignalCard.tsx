@@ -11,6 +11,8 @@ import { Clock, Target, TriangleAlert as AlertTriangle, Check as CheckIcon, X, C
 import { Signal } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import CampaignBanner from './CampaignBanner';
+import { Campaign, getRandomSignalModalCampaign } from '../lib/campaigns';
 
 interface SignalCardProps {
   signal: Signal;
@@ -20,6 +22,23 @@ export default function SignalCard({ signal }: SignalCardProps) {
   const { colors, fontSizes } = useTheme();
   const { t } = useLanguage();
   const [visible, setVisible] = useState(false);
+  const [modalCampaign, setModalCampaign] = useState<Campaign | null>(null);
+
+  // Load campaign when modal opens
+  useEffect(() => {
+    if (visible) {
+      loadModalCampaign();
+    }
+  }, [visible]);
+
+  const loadModalCampaign = async () => {
+    try {
+      const randomCampaign = await getRandomSignalModalCampaign();
+      setModalCampaign(randomCampaign);
+    } catch (error) {
+      console.error('Error loading modal campaign:', error);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -268,6 +287,13 @@ export default function SignalCard({ signal }: SignalCardProps) {
             <Text style={styles.sheetItem}>
               R:R: {signal.risk_reward}
             </Text>
+
+            {/* Campaign Banner in Modal */}
+            {modalCampaign && (
+              <View style={{ marginVertical: 16 }}>
+                <CampaignBanner campaign={modalCampaign} aspectRatio="1:2" />
+              </View>
+            )}
 
             {signal.description && (
               <Text style={styles.sheetDescription}>{signal.description}</Text>

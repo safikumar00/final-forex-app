@@ -4,8 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import SignalCard from '../../components/SignalCard';
+import CampaignBanner from '../../components/CampaignBanner';
 import { subscribeToSignals } from '../../supabase/signals';
 import { Signal } from '../../lib/supabase';
+import { Campaign, getRandomSignalsPageCampaign } from '../../lib/campaigns';
 import { Award, ChartBar, DollarSign, Target, TrendingDown, TrendingUp } from 'lucide-react-native';
 
 export default function SignalsScreen() {
@@ -14,6 +16,7 @@ export default function SignalsScreen() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
 
   const handleSignalsUpdate = useCallback((newSignals: Signal[]) => {
     setSignals(newSignals);
@@ -21,11 +24,22 @@ export default function SignalsScreen() {
 
   useEffect(() => {
     const unsubscribe = subscribeToSignals(handleSignalsUpdate);
+    loadCampaign();
     return () => unsubscribe?.();
   }, []);
 
+  const loadCampaign = async () => {
+    try {
+      const randomCampaign = await getRandomSignalsPageCampaign();
+      setCampaign(randomCampaign);
+    } catch (error) {
+      console.error('Error loading campaign:', error);
+    }
+  };
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+    loadCampaign(); // Reload campaign on refresh
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
@@ -166,6 +180,13 @@ export default function SignalsScreen() {
           ))}
         </View>
       </ScrollView>
+        {/* Campaign Banner */}
+        {campaign && (
+          <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+            <CampaignBanner campaign={campaign} aspectRatio="1:4" />
+          </View>
+        )}
+
     </SafeAreaView>
   );
 }
