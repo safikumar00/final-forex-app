@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { BarChart, Eye, MousePointer, Users, TrendingUp } from 'lucide-react-native';
+import { ChartBar as BarChart, Eye, MousePointer, Users, TrendingUp } from 'lucide-react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import {
   getNotificationAnalytics,
