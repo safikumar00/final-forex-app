@@ -152,7 +152,7 @@ export default function CalculatorScreen() {
       paddingVertical: 16,
     },
     title: {
-      fontSize: fontSizes.title + 4,
+      fontSize: fontSizes.large + 4,
       fontWeight: 'bold',
       color: colors.text,
       fontFamily: 'Inter-Bold',

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { TrendingUp, Wallet, ChartBar as BarChart3, User, PhoneIncoming as HomeIcon, Calculator as CalculatorIcon, View, Settings2, Bell } from 'lucide-react-native';
+import { TrendingUp, Wallet, ChartBar as BarChart3, User, PhoneIncoming as HomeIcon, Calculator as CalculatorIcon, View, Settings2, Bell, LucideHome, SettingsIcon } from 'lucide-react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StyleSheet, TouchableOpacity } from 'react-native';
@@ -37,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: t('home'),
           tabBarIcon: ({ size, color }) => (
-            <HomeIcon size={size} color={color} />
+            <LucideHome size={size} color={color} />
           ),
         }}
       />
@@ -64,7 +64,7 @@ export default function TabLayout() {
         options={{
           title: t('settings'),
           tabBarIcon: ({ size, color }) => (
-            <Settings2 size={size} color={color} />
+            <SettingsIcon size={size} color={color} />
           ),
         }}
       />

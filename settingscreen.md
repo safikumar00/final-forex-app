@@ -26,7 +26,6 @@ import { backgroundSyncManager } from '../../lib/backgroundSyncManager';
 import { supabase } from '@/lib/supabase';
 import { getFCMToken } from '@/lib/notifications';
 
-
 export default function SettingsScreen() {
   const { colors, fontSizes, theme, setTheme, fontSize, setFontSize } = useTheme();
   const { t, currentLanguageInfo, availableLanguages, changeLanguage } = useLanguage();
@@ -34,83 +33,10 @@ export default function SettingsScreen() {
   const [showSilentTests, setShowSilentTests] = useState(false);
   const [showBackendMonitor, setShowBackendMonitor] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
-  const [deviceProfile, setDeviceProfile] = useState<DeviceProfile | null>(null);
-  const [deviceId, setDeviceId] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [deviceInitialized, setDeviceInitialized] = useState(false);
 
 
-  const loadDeviceInfo = useCallback(async () => {
-    try {
-      setLoading(true);
-      console.log('🔄 Fetching FCM token...');
-
-      // 1. Get the FCM token for the current device
-      const fcmToken = await getFCMToken();
-
-      if (!fcmToken) {
-        console.warn('⚠️ No FCM token found. Skipping device info fetch.');
-        return;
-      }
-
-      const deviceId = await getCurrentDeviceId();
-
-      console.log('📖 Loading device info for:', deviceId);
-
-      console.log('🔍 Looking for device with FCM token:', fcmToken);
-
-      // 2. Query Supabase where fcm_token matches
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('id, user_id, fcm_token, device_type')
-        .eq('fcm_token', fcmToken)
-        .limit(1); // returns null if not found
-
-      if (error) {
-        console.error('❌ Supabase fetch error:', error.message);
-        Alert.alert(t('error'), t('failedToLoad'));
-        return;
-      }
-
-      if (!data || !data[0]) {
-        console.log('⚠️ No device found with this FCM token. Registering device...');
-        registerDevice(fcmToken);
-      } else {
-        console.log('✅ Device profile loaded via FCM token:', {
-          user_id: data[0].user_id,
-          deviceType: data[0].device_type,
-        });
-
-        setDeviceId(data[0].user_id);     // set local state
-        // setDeviceProfile(data[0]);        // set local state
-      }
-    } catch (error) {
-      console.error('❌ Unexpected error loading device info:', error);
-      Alert.alert(t('error'), t('failedToLoad'));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
 
 
-  useEffect(() => {
-    if (!deviceInitialized) {
-      loadDeviceInfo().then(() => {
-        setDeviceInitialized(true);
-      });
-
-      // Initialize silent notification system
-      // const initializeSilentSystem = async () => {
-      //   try {
-      //     await silentNotificationHandler.initialize();
-      //     await backgroundSyncManager.initialize();
-      //     console.log('✅ Silent notification system initialized');
-      //   } catch (error) {
-      //     console.error('❌ Error initializing silent system:', error);
-      //   }
-      // };
-    }
-  }, [loadDeviceInfo, deviceInitialized]);
 
   const handleShare = async () => {
     try {
@@ -120,13 +46,6 @@ export default function SettingsScreen() {
       });
     } catch (error) {
       console.log('Error sharing:', error);
-    }
-  };
-
-  const handleNotificationRegistration = (deviceId: string | null) => {
-    if (deviceId) {
-      // Refresh device info after successful registration
-      loadDeviceInfo();
     }
   };
 
@@ -212,7 +131,7 @@ export default function SettingsScreen() {
       marginBottom: 24,
     },
     title: {
-      fontSize: fontSizes.large + 4,
+      fontSize: fontSizes.title + 4,
       fontWeight: 'bold',
       color: colors.text,
       fontFamily: 'Inter-Bold',
@@ -516,22 +435,105 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-
-
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{t('settingsTitle')}</Text>
           <Text style={styles.subtitle}>{t('settingsSubtitle')}</Text>
         </View>
 
-        <PushNotificationManager onRegistrationComplete={handleNotificationRegistration} />
+        {/* Push Notification Manager */}
+        {/* <PushNotificationManager onRegistrationComplete={handleNotificationRegistration} /> */}
 
+        {/* Device Information */}
+        {/* <View style={styles.deviceCard}>
+          <View style={styles.deviceHeader}>
+            <View style={styles.deviceIcon}>
+              <Smartphone size={20} color={colors.primary} />
+            </View>
+            <Text style={styles.deviceTitle}>{t('deviceInformation')}</Text>
+          </View>
+
+          <View style={styles.deviceInfo}>
+            <View style={styles.deviceRow}>
+              <Text style={styles.deviceLabel}>{t('deviceId')}:</Text>
+              <Text style={styles.deviceValue}>
+                {deviceId ? `${deviceId.substring(0, 20)}...` : t('loading')}
+              </Text>
+            </View>
+
+            <View style={styles.deviceRow}>
+              <Text style={styles.deviceLabel}>{t('deviceType')}:</Text>
+              <Text style={styles.deviceValue}>
+                {deviceProfile?.device_type || 'Unknown'}
+              </Text>
+            </View>
+
+            <View style={styles.deviceRow}>
+              <Text style={styles.deviceLabel}>{t('appVersion')}:</Text>
+              <Text style={styles.deviceValue}>
+                {deviceProfile?.app_version || '1.0.0'}
+              </Text>
+            </View>
+
+            <View style={styles.deviceRow}>
+              <Text style={styles.deviceLabel}>{t('notifications')}:</Text>
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>
+                  {deviceProfile?.fcm_token ? t('enabled') : t('disabled')}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View> */}
+
+        {/* Backend Monitor Toggle */}
+        {/* {Platform.OS === 'web' && (
+          <TouchableOpacity
+            style={styles.testToggle}
+            onPress={() => setShowBackendMonitor(!showBackendMonitor)}
+          >
+            <Text style={styles.testToggleText}>
+              {showBackendMonitor ? 'Hide' : 'Show'} Backend Monitor
+            </Text>
+          </TouchableOpacity>
+        )} */}
+
+        {/* Backend Monitor */}
+        {/* {showBackendMonitor && Platform.OS === 'web' && <BackendMonitor />} */}
+
+        {/* Silent Notification Test Panel Toggle */}
+        {/* {Platform.OS === 'web' && (
+          <TouchableOpacity
+            style={[styles.testToggle, styles.silentTestToggle]}
+            onPress={() => setShowSilentTests(!showSilentTests)}
+          >
+            <Text style={[styles.testToggleText, styles.silentTestToggleText]}>
+              {showSilentTests ? 'Hide' : 'Show'} Silent Notification Tests
+            </Text>
+          </TouchableOpacity>
+        )} */}
+
+        {/* Silent Notification Test Panel */}
+        {/* {showSilentTests && Platform.OS === 'web' && <SilentNotificationTester />} */}
+
+        {/* Notification Test Panel Toggle */}
+        {/* {Platform.OS === 'web' && (
+          <TouchableOpacity
+            style={styles.testToggle}
+            onPress={() => setShowNotificationTests(!showNotificationTests)}
+          >
+            <Text style={styles.testToggleText}>
+              {showNotificationTests ? 'Hide' : 'Show'} Notification Tests
+            </Text>
+          </TouchableOpacity>
+        )} */}
+
+        {/* Notification Test Panel */}
+        {/* {showNotificationTests && Platform.OS === 'web' && <NotificationTestPanel />} */}
 
         {/* App Preferences */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('preferences')}</Text>
-          {/* <Text>Status: {isEnabled ? "Enabled" : "Not Enabled"}</Text> */}
-
 
           {/* Language Selection */}
           <TouchableOpacity

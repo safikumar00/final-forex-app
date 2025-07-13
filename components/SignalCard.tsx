@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { Clock, Target, TriangleAlert as AlertTriangle, Check as CheckIcon, X } from 'lucide-react-native';
+import { Clock, Target, TriangleAlert as AlertTriangle, Check as CheckIcon, X, CheckCheck, CrossIcon, StopCircle, XIcon, XCircleIcon } from 'lucide-react-native';
 import { Signal } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -183,6 +183,7 @@ export default function SignalCard({ signal }: SignalCardProps) {
     },
   });
 
+
   return (
     <>
       <TouchableOpacity style={styles.container} onPress={() => setVisible(true)}>
@@ -239,9 +240,9 @@ export default function SignalCard({ signal }: SignalCardProps) {
                     </Text>
                     <Text style={styles.takeProfitText}>
                       {formatPrice(tp)}
-                      <CheckIcon
+                      <CheckCheck style={{ display: isReached ? 'flex' : 'none' }}
                         size={16}
-                        color={isReached ? colors.success : colors.textSecondary}
+                        color={colors.success}
                       />
                     </Text>
                   </View>
@@ -249,8 +250,20 @@ export default function SignalCard({ signal }: SignalCardProps) {
               })}
             </View>
 
+            <View style={styles.takeProfitItem}>
+              <Text style={styles.takeProfitText}>
+                {t('stopLoss')}:
+              </Text>
+              <Text style={styles.takeProfitText}>
+                {formatPrice(signal.stop_loss)}
+                <XCircleIcon style={{ display: signal.current_price !== undefined && signal.current_price <= signal.stop_loss ? 'flex' : 'none' }}
+                  size={16}
+                  color={colors.error}
+                />
+              </Text>
+            </View>
+
             <Text style={styles.sheetItem}>
-              {t('stopLoss')}: {formatPrice(signal.stop_loss)}
             </Text>
             <Text style={styles.sheetItem}>
               R:R: {signal.risk_reward}

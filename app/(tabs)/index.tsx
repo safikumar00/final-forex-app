@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Platform,
+  Alert,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +23,8 @@ import SetupGuide from '@/components/SetupGuide';
 import { fetchMarketData, fetchTechnicalIndicators, fetchEconomicEvents, MarketData, TechnicalIndicator, EconomicEvent } from '../../lib/database';
 import { getForexPrice } from '../../lib/forex';
 import { fetchPriceSummary } from '../../lib/database';
+import { DeviceProfile, getCurrentDeviceId, getFCMToken, registerDevice } from '@/lib/notifications';
+import { supabase } from '@/lib/supabase';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -60,6 +63,85 @@ export default function HomeScreen() {
   const [economicEvents, setEconomicEvents] = useState<EconomicEvent[]>([]);
   const [livePrice, setLivePrice] = useState<number | null>(null);
   const tradingViewInterval = getTradingViewInterval(timeframe);
+
+  const [deviceProfile, setDeviceProfile] = useState<DeviceProfile | null>(null);
+  const [deviceId, setDeviceId] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  const loadDeviceInfo = useCallback(async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Fetching FCM token...');
+
+      // 1. Get the FCM token for the current device
+      const fcmToken = await getFCMToken();
+
+      if (!fcmToken) {
+        console.warn('⚠️ No FCM token found. Skipping device info fetch.');
+        return;
+      }
+
+      const deviceId = await getCurrentDeviceId();
+
+      console.log('📖 Loading device info for:', deviceId);
+
+      console.log('🔍 Looking for device with FCM token:', fcmToken);
+
+      // 2. Query Supabase where fcm_token matches
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('id, user_id, fcm_token, device_type')
+        .eq('fcm_token', fcmToken)
+        .limit(1); // returns null if not found
+
+      if (error) {
+        console.error('❌ Supabase fetch error:', error.message);
+        Alert.alert(t('error'), t('failedToLoad'));
+        return;
+      }
+
+      if (!data || !data[0]) {
+        console.log('⚠️ No device found with this FCM token. Registering device...');
+        registerDevice(fcmToken);
+      } else {
+        console.log('✅ Device profile loaded via FCM token:', {
+          user_id: data[0].user_id,
+          deviceType: data[0].device_type,
+        });
+
+        setDeviceId(data[0].user_id);     // set local state
+        // setDeviceProfile(data[0]);        // set local state
+      }
+    } catch (error) {
+      console.error('❌ Unexpected error loading device info:', error);
+      Alert.alert(t('error'), t('failedToLoad'));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+
+  const [deviceInitialized, setDeviceInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!deviceInitialized) {
+      loadDeviceInfo().then(() => {
+        setDeviceInitialized(true);
+      });
+
+      // Initialize silent notification system
+      // const initializeSilentSystem = async () => {
+      //   try {
+      //     await silentNotificationHandler.initialize();
+      //     await backgroundSyncManager.initialize();
+      //     console.log('✅ Silent notification system initialized');
+      //   } catch (error) {
+      //     console.error('❌ Error initializing silent system:', error);
+      //   }
+      // };
+    }
+  }, [loadDeviceInfo, deviceInitialized]);
+
 
   const fetchLivePrice = async () => {
     setPriceLoading(true);
@@ -177,7 +259,7 @@ export default function HomeScreen() {
       flex: 1,
     },
     title: {
-      fontSize: fontSizes.title + 4,
+      fontSize: fontSizes.large + 4,
       fontWeight: 'bold',
       color: colors.text,
       fontFamily: 'Inter-Bold',
@@ -436,7 +518,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-      
+
       <NotificationSheet
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}

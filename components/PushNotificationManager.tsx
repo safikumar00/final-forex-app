@@ -153,7 +153,7 @@ export default function PushNotificationManager({ onRegistrationComplete }: Push
     header: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 12,
+      // marginBottom: 12,
     },
     iconContainer: {
       width: 40,
@@ -236,13 +236,13 @@ export default function PushNotificationManager({ onRegistrationComplete }: Push
         </TouchableOpacity>
       )}
 
-      {deviceId && (
+      {/* {deviceId && (
         <View style={styles.deviceInfo}>
           <Text style={styles.deviceText}>
             {t('deviceId')}: {deviceId.substring(0, 20)}...
           </Text>
         </View>
-      )}
+      )} */}
     </View>
   );
 }

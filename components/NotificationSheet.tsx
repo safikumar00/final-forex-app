@@ -267,7 +267,7 @@ export default function NotificationSheet({ visible, onClose }: NotificationShee
                             {getTimeAgo(notification.created_at)}
                           </Text>
                           <Text style={styles.reached}>
-                            {Math.floor(Math.random() * 50) + 10} <EyeIcon size={16} color={colors.textSecondary} />
+                            {/* {Math.floor(Math.random() * 50) + 10} <EyeIcon size={16} color={colors.textSecondary} /> */}
                           </Text>
                         </View>
                       </View>

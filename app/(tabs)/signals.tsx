@@ -40,20 +40,20 @@ export default function SignalsScreen() {
     },
     statCard: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 24,
+      borderRadius: 4,
+      padding: 12,
       alignItems: 'center',
       borderWidth: 1,
       borderColor: colors.border,
       flexBasis: '48%',
     },
     statValue: {
-      fontSize: fontSizes.subtitle,
+      fontSize: fontSizes.large,
       fontWeight: 'bold',
       color: colors.text,
       fontFamily: 'Inter-Bold',
-      marginTop: 8,
-      marginBottom: 4,
+      // marginTop: 8,
+      // marginBottom: 4,
     },
     statLabel: {
       fontSize: fontSizes.small,
@@ -98,7 +98,7 @@ export default function SignalsScreen() {
       >
         <View style={{ padding: 20 }}>
           <Text style={{
-            fontSize: fontSizes.title + 4,
+            fontSize: fontSizes.large + 4,
             fontWeight: 'bold',
             color: colors.text,
             fontFamily: 'Inter-Bold',
@@ -107,24 +107,32 @@ export default function SignalsScreen() {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Target size={24} color={colors.success} />
-              <Text style={styles.statValue}>{portfolioStats.totalTrades}</Text>
-              <Text style={styles.statLabel}>{t('totalTrades')}</Text>
+              {/* <Target size={24} color={colors.success} /> */}
+              <View style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.statLabel}>{t('totalTrades')}</Text>
+                <Text style={styles.statValue}>{portfolioStats.totalTrades}</Text>
+              </View>
             </View>
             <View style={styles.statCard}>
-              <TrendingUp size={24} color={colors.success} />
-              <Text style={styles.statValue}>{portfolioStats.profitTrades}</Text>
-              <Text style={styles.statLabel}>{t('profitTrades')}</Text>
+              {/* <TrendingUp size={24} color={colors.success} /> */}
+              <View style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.statLabel}>{t('profitTrades')}</Text>
+                <Text style={styles.statValue}>{portfolioStats.profitTrades}</Text>
+              </View>
             </View>
             <View style={styles.statCard}>
-              <TrendingDown size={24} color={colors.error} />
-              <Text style={styles.statValue}>{portfolioStats.lossTrades}</Text>
-              <Text style={styles.statLabel}>{t('lossTrades')}</Text>
+              {/* <TrendingDown size={24} color={colors.error} /> */}
+              <View style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.statLabel}>{t('lossTrades')}</Text>
+                <Text style={styles.statValue}>{portfolioStats.lossTrades}</Text>
+              </View>
             </View>
             <View style={styles.statCard}>
-              <ChartBar size={24} color={colors.primary} />
-              <Text style={styles.statValue}>{activeSignals.length}</Text>
-              <Text style={styles.statLabel}>{t('activeTrades')}</Text>
+              {/* <ChartBar size={24} color={colors.primary} /> */}
+              <View style={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.statLabel}>{t('activeTrades')}</Text>
+                <Text style={styles.statValue}>{activeSignals.length}</Text>
+              </View>
             </View>
           </View>
 
