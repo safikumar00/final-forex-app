@@ -11,7 +11,21 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://govngwsrefzqnuczhzdi.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdvdm5nd3NyZWZ6cW51Y3poemRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MDI4NDQsImV4cCI6MjA2NjA3ODg0NH0.5W7A7aVMMo54jtYOmsVeFgbQhXtsQPhmnjZFBMNqa1k",
+        "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdvdm5nd3NyZWZ6cW51Y3poemRpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDUwMjg0NCwiZXhwIjoyMDY2MDc4ODQ0fQ.q65QDSs3N7HKjtLdS_RNflqb6l270hVeDo0-v2C6_Pg",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBpNUxyC4stfKOuEoZiZOq0cxkvnGjTkHM",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "forex-signal-app-c0c32",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:245922029776:web:ad1ff5d97ac5e4e01d3ed5",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "245922029776",
+        "EXPO_PUBLIC_FIREBASE_VAPID_KEY": "BFF8LCxcGGfvgAsQmV8P8brjmqCae77Hm3f19qjIiIP6KDlQHeyra19moyecFRgZNjaKwjKEq4sDJLxvmwXBq2Q",
+        "EXPO_PUBLIC_EAS_PROJECT_ID": "8ce373b5-978a-43ad-a4cb-3ad8feb6e149"
+      }
     },
     "apk": {
       "distribution": "internal",

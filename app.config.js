@@ -19,9 +19,18 @@ export default {
     supportsTablet: true,
   },
   android: {
-    googleServicesFile: './google-services.json', // ✅ important
     package: 'com.safikumar00.boltexponativewind',
-    permissions: ['NOTIFICATIONS'], // 👈 required for Android 13+
+    googleServicesFile: './google-services.json',
+    versionCode: 1,
+    icon: './assets/images/icon.png', // required for push icon
+    adaptiveIcon: {
+      foregroundImage: './assets/images/icon.png',
+      backgroundColor: '#FFFFFF',
+    },
+    notification: {
+      icon: './assets/images/icon.png', // small monochrome
+      color: '#FF0000', // optional accent color
+    },
   },
   plugins: ['expo-notifications'],
   extra: {
