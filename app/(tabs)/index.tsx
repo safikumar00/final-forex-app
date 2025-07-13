@@ -24,6 +24,8 @@ import { getForexPrice } from '../../lib/forex';
 import { fetchPriceSummary } from '../../lib/database';
 import { DeviceProfile, getCurrentDeviceId, getFCMToken, registerDevice } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
+import NotificationSheet from '@/components/NotificationSheet';
+import SetupGuide from '@/components/SetupGuide';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -60,7 +62,8 @@ export default function HomeScreen() {
   const [economicEvents, setEconomicEvents] = useState<EconomicEvent[]>([]);
   const [livePrice, setLivePrice] = useState<number | null>(null);
   const tradingViewInterval = getTradingViewInterval(timeframe);
-
+  const [setupGuideVisible, setSetupGuideVisible] = useState(false);
+  const [notificationVisible, setNotificationVisible] = useState(false);
   const [deviceProfile, setDeviceProfile] = useState<DeviceProfile | null>(null);
   const [deviceId, setDeviceId] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -392,6 +395,16 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>{t('homeSubtitle')}</Text>
         </View>
         <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.actionButton}
+            onPress={() => setSetupGuideVisible(true)}
+          >
+            <Settings2 size={24} color={colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}
+            onPress={() => setNotificationVisible(true)}
+          >
+            <Bell size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -505,9 +518,18 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <NotificationSheet
+          visible={notificationVisible}
+          onClose={() => setNotificationVisible(false)}
+        />
+
+        <SetupGuide
+          visible={setupGuideVisible}
+          onClose={() => setSetupGuideVisible(false)}
+        />
+
 
         {/* About App Section */}
-        <AboutAppSection />
       </ScrollView>
     </SafeAreaView>
   );

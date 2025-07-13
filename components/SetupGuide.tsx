@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Database, ExternalLink, Copy, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { fetchSetupSteps, SetupStep } from '../lib/database';
+import AboutAppSection from './AboutAppSection';
 
 interface SetupGuideProps {
   visible: boolean;
@@ -229,83 +230,7 @@ export default function SetupGuide({ visible, onClose }: SetupGuideProps) {
 
         <View style={styles.container}>
           <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.header}>
-              <View style={styles.headerLeft}>
-                <View style={styles.iconContainer}>
-                  <Database size={20} color={colors.primary} />
-                </View>
-                <View>
-                  <Text style={styles.title}>Setup Guide</Text>
-                  <Text style={styles.subtitle}>Connect to Supabase</Text>
-                </View>
-              </View>
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <X size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>Loading setup guide...</Text>
-              </View>
-            ) : (
-              <ScrollView
-                contentContainerStyle={{ paddingBottom: 20 }}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-              >
-                <View style={styles.intro}>
-                  <Text style={styles.introText}>
-                    Follow these steps to connect your app to Supabase and enable live trading signals.
-                    The app works perfectly in demo mode, but connecting to Supabase will give you real-time data.
-                  </Text>
-                </View>
-
-                <View style={styles.stepsContainer}>
-                  {setupSteps.map((step, index) => (
-                    <View key={step.id} style={styles.step}>
-                      <View style={styles.stepHeader}>
-                        <View style={styles.stepNumber}>
-                          <Text style={styles.stepNumberText}>{step.step_order}</Text>
-                        </View>
-                        <Text style={styles.stepTitle}>{step.title}</Text>
-                      </View>
-
-                      <Text style={styles.stepDescription}>
-                        {step.description}
-                      </Text>
-
-                      <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => step.code_sample && copyToClipboard(step.code_sample, index)}
-                      >
-                        <Text style={styles.actionButtonText}>{step.action_text}</Text>
-                        {copiedStep === index ? (
-                          <CheckCircle size={16} color={colors.success} />
-                        ) : step.code_sample ? (
-                          <Copy size={16} color={colors.textSecondary} />
-                        ) : (
-                          <ExternalLink size={16} color={colors.textSecondary} />
-                        )}
-                      </TouchableOpacity>
-
-                      {step.code_sample && (
-                        <View style={styles.codeBlock}>
-                          <Text style={styles.codeText}>{step.code_sample}</Text>
-                        </View>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
-            )}
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                Need help? The app works great in demo mode while you set up Supabase.
-              </Text>
-            </View>
+            <AboutAppSection />
           </SafeAreaView>
         </View>
       </View>

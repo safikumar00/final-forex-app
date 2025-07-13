@@ -48,7 +48,7 @@ export default function AboutAppSection() {
 
   const handleSocialLink = async (url: string | undefined, platform: string) => {
     if (!url) return;
-    
+
     try {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
@@ -63,7 +63,7 @@ export default function AboutAppSection() {
 
   const handleEmailContact = async () => {
     if (!appInfo?.contact_email) return;
-    
+
     const emailUrl = `mailto:${appInfo.contact_email}?subject=Trading Signals App Support`;
     try {
       await Linking.openURL(emailUrl);
@@ -72,15 +72,7 @@ export default function AboutAppSection() {
     }
   };
 
-  if (loading || !appInfo) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.surface }]}>
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-          {t('loading')}
-        </Text>
-      </View>
-    );
-  }
+
 
   const styles = StyleSheet.create({
     container: {
@@ -200,6 +192,16 @@ export default function AboutAppSection() {
     },
   });
 
+  if (loading || !appInfo) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+          {t('loading')}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Campaign Banner */}
@@ -216,7 +218,7 @@ export default function AboutAppSection() {
 
       {/* Features Section */}
       <Text style={styles.sectionTitle}>✨ Key Features</Text>
-      {appInfo.features.map((feature, index) => (
+      {appInfo?.features?.map((feature, index) => (
         <View key={index} style={styles.featureItem}>
           <CheckCircle size={16} color={colors.success} />
           <Text style={styles.featureText}>{feature}</Text>
@@ -225,7 +227,7 @@ export default function AboutAppSection() {
 
       {/* How to Use Section */}
       <Text style={styles.sectionTitle}>🚀 How to Get Started</Text>
-      {appInfo.how_to_use.map((step, index) => (
+      {appInfo?.how_to_use?.map((step, index) => (
         <View key={index} style={styles.stepItem}>
           <View style={styles.stepNumber}>
             <Text style={styles.stepNumberText}>{index + 1}</Text>
@@ -244,8 +246,8 @@ export default function AboutAppSection() {
         )}
 
         {appInfo.telegram_url && (
-          <TouchableOpacity 
-            style={styles.socialButton} 
+          <TouchableOpacity
+            style={styles.socialButton}
             onPress={() => handleSocialLink(appInfo.telegram_url, 'Telegram')}
           >
             <MessageCircle size={16} color={colors.secondary} />
@@ -254,8 +256,8 @@ export default function AboutAppSection() {
         )}
 
         {appInfo.twitter_url && (
-          <TouchableOpacity 
-            style={styles.socialButton} 
+          <TouchableOpacity
+            style={styles.socialButton}
             onPress={() => handleSocialLink(appInfo.twitter_url, 'Twitter')}
           >
             <Twitter size={16} color={colors.warning} />
@@ -264,8 +266,8 @@ export default function AboutAppSection() {
         )}
 
         {appInfo.linkedin_url && (
-          <TouchableOpacity 
-            style={styles.socialButton} 
+          <TouchableOpacity
+            style={styles.socialButton}
             onPress={() => handleSocialLink(appInfo.linkedin_url, 'LinkedIn')}
           >
             <Linkedin size={16} color={colors.primary} />
