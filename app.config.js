@@ -32,12 +32,19 @@ export default {
       color: '#FF0000', // optional accent color
     },
   },
+  scheme: 'myapp',
   plugins: [
     [
       'expo-notifications',
       {
         icon: './assets/images/ic_notification.png',
         color: '#FF0000',
+      },
+    ],
+    [
+      'expo-linking',
+      {
+        scheme: 'myapp',
       },
     ],
   ],

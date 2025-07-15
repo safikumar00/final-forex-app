@@ -12,6 +12,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { setupEnhancedNotificationHandlers, setupNotificationCategories } from '@/lib/notifications/enhancedPush';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -31,7 +32,19 @@ export default function RootLayout() {
     async function prepare() {
       try {
         console.log('🚀 App initializing...');
+        
+        // Setup enhanced notification handling
+        const cleanupNotifications = setupEnhancedNotificationHandlers();
+        
+        // Setup iOS notification categories
+        await setupNotificationCategories();
+        
         setIsReady(true);
+        
+        // Store cleanup function for later use
+        return () => {
+          cleanupNotifications();
+        };
       } catch (error) {
         console.error('❌ Error during app initialization:', error);
         setIsReady(true);

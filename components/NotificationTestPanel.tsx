@@ -19,6 +19,7 @@ import {
   sendTargetedNotification,
   createPushNotification,
 } from '../lib/notifications';
+import { createSignalNotification, createAchievementNotification, createMarketUpdateNotification } from '../lib/notifications/richNotifications';
 
 export default function NotificationTestPanel() {
   const { colors, fontSizes } = useTheme();
@@ -38,14 +39,27 @@ export default function NotificationTestPanel() {
 
   const handleSignalNotification = async () => {
     try {
-      await sendSignalNotification({
+      const richNotification = createSignalNotification({
         id: 'test-signal-123',
         pair: 'XAU/USD',
         type: 'BUY',
         entry_price: 2345.67,
         status: 'active',
       });
-      Alert.alert(t('success'), 'Signal notification triggered!');
+      
+      await createPushNotification({
+        type: 'signal',
+        title: richNotification.title,
+        message: richNotification.body,
+        data: richNotification.data,
+        rich_content: {
+          image: richNotification.image,
+          actions: richNotification.actions,
+          deep_link: richNotification.deepLink,
+        },
+      });
+      
+      Alert.alert(t('success'), 'Enhanced signal notification triggered!');
     } catch (error) {
       Alert.alert(t('error'), 'Failed to send signal notification');
     }
@@ -53,12 +67,25 @@ export default function NotificationTestPanel() {
 
   const handleAchievementNotification = async () => {
     try {
-      await sendAchievementNotification({
+      const richNotification = createAchievementNotification({
         title: 'Winning Streak',
         description: 'You\'ve achieved a 5-day winning streak!',
         type: 'streak',
       });
-      Alert.alert(t('success'), 'Achievement notification triggered!');
+      
+      await createPushNotification({
+        type: 'achievement',
+        title: richNotification.title,
+        message: richNotification.body,
+        data: richNotification.data,
+        rich_content: {
+          image: richNotification.image,
+          actions: richNotification.actions,
+          deep_link: richNotification.deepLink,
+        },
+      });
+      
+      Alert.alert(t('success'), 'Enhanced achievement notification triggered!');
     } catch (error) {
       Alert.alert(t('error'), 'Failed to send achievement notification');
     }
@@ -88,16 +115,26 @@ export default function NotificationTestPanel() {
 
   const handleBroadcastNotification = async () => {
     try {
-      await sendBroadcastNotification({
-        type: 'announcement',
+      const richNotification = createMarketUpdateNotification({
         title: 'Market Update',
         message: 'Gold showing strong bullish momentum this week!',
-        data: {
-          market: 'gold',
-          sentiment: 'bullish',
+        market: 'gold',
+        sentiment: 'bullish',
+      });
+      
+      await createPushNotification({
+        type: 'announcement',
+        title: richNotification.title,
+        message: richNotification.body,
+        data: richNotification.data,
+        rich_content: {
+          image: richNotification.image,
+          actions: richNotification.actions,
+          deep_link: richNotification.deepLink,
         },
       });
-      Alert.alert(t('success'), 'Broadcast notification sent to all users!');
+      
+      Alert.alert(t('success'), 'Enhanced broadcast notification sent to all users!');
     } catch (error) {
       Alert.alert(t('error'), 'Failed to send broadcast notification');
     }
@@ -316,8 +353,8 @@ export default function NotificationTestPanel() {
 
       <View style={styles.infoBox}>
         <Text style={styles.infoText}>
-          ✨ Notifications are automatically triggered when inserted into the database! 
-          The system uses Supabase triggers to send push notifications instantly.
+          ✨ Enhanced notifications with rich content, action buttons, and deep linking! 
+          The system now supports click tracking, user analytics, and interactive notifications.
         </Text>
       </View>
 

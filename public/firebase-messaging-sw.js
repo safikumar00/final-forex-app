@@ -83,10 +83,18 @@ self.addEventListener('notificationclick', (event) => {
 
   const { action } = event;
   const data = event.notification.data || {};
+  const notificationId = data.notification_id;
+  const deepLink = data.deep_link;
 
-  // Log notification click event if we have the required data
-  if (data?.notification_id && data?.user_id) {
+  // Log notification click event
+  if (notificationId) {
     console.log('📊 Logging notification click event');
+    
+    // Determine action type
+    let actionType = 'default';
+    if (action) {
+      actionType = action;
+    }
 
     // Log the click event (fire and forget - don't block the main action)
     fetch(
@@ -100,43 +108,11 @@ self.addEventListener('notificationclick', (event) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          notification_id: data.notification_id,
-          user_id: data.user_id,
+          notification_id: notificationId,
+          user_id: data.user_id || 'web_user',
           event_type: 'clicked',
-        }),
-      }
-    )
-      .then((response) => {
-        if (response.ok) {
-          console.log('✅ Notification click logged successfully');
-        } else {
-          console.warn('⚠️ Failed to log notification click:', response.status);
-        }
-      })
-      .catch((err) => {
-        console.error('⚠️ Error logging notification click:', err);
-      });
-  }
-
-  // Log notification click event if we have the required data
-  if (data?.notification_id && data?.user_id) {
-    console.log('📊 Logging notification click event');
-
-    // Log the click event (fire and forget - don't block the main action)
-    fetch(
-      `${self.location.origin.replace(
-        'localhost:8081',
-        'govngwsrefzqnuczhzdi.supabase.co'
-      )}/functions/v1/log-notification-event`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          notification_id: data.notification_id,
-          user_id: data.user_id,
-          event_type: 'clicked',
+          action_type: actionType,
+          deep_link: deepLink,
         }),
       }
     )
@@ -153,31 +129,78 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Handle different actions
-  if (action === 'view' || !action) {
-    // Open the app or focus existing window
-    event.waitUntil(
-      self.clients.matchAll({ type: 'window' }).then((clients) => {
-        // Check if app is already open
-        for (const client of clients) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            return client.focus();
-          }
-        }
-
-        // Open new window if app is not open
-        if (self.clients.openWindow) {
-          const url = data?.signal_id
-            ? `${self.location.origin}/signals?id=${data.signal_id}`
-            : self.location.origin;
-          return self.clients.openWindow(url);
-        }
-      })
-    );
-  } else if (action === 'dismiss') {
-    // Just close the notification (already done above)
-    console.log('📝 Notification dismissed');
+  switch (action) {
+    case 'view':
+      console.log('📈 User chose to view content');
+      handleNotificationAction(data, deepLink);
+      break;
+    case 'open_chart':
+      console.log('📊 User chose to open chart');
+      handleNotificationAction(data, deepLink, 'chart');
+      break;
+    case 'share':
+      console.log('📤 User chose to share');
+      handleNotificationAction(data, deepLink, 'share');
+      break;
+    case 'dismiss':
+      console.log('❌ User dismissed notification');
+      // Just close the notification (already done above)
+      break;
+    default:
+      console.log('👆 Default notification tap');
+      handleNotificationAction(data, deepLink);
+      break;
   }
 });
+
+// Handle notification action with deep linking
+function handleNotificationAction(data, deepLink, actionType = 'default') {
+  const targetUrl = determineTargetUrl(data, deepLink, actionType);
+  
+  // Open the app or focus existing window
+  self.clients.matchAll({ type: 'window' }).then((clients) => {
+    // Check if app is already open
+    for (const client of clients) {
+      if (client.url.includes(self.location.origin) && 'focus' in client) {
+        // Send message to client to handle navigation
+        client.postMessage({
+          type: 'NOTIFICATION_ACTION',
+          action: actionType,
+          data: data,
+          deepLink: deepLink,
+          targetUrl: targetUrl,
+        });
+        return client.focus();
+      }
+    }
+
+    // Open new window if app is not open
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(targetUrl);
+    }
+  });
+}
+
+// Determine target URL based on action and data
+function determineTargetUrl(data, deepLink, actionType) {
+  // If we have a deep link, use it
+  if (deepLink) {
+    // Convert deep link to web URL
+    const webUrl = deepLink.replace('myapp://', self.location.origin + '/');
+    return webUrl;
+  }
+  
+  // Fallback based on data
+  if (data?.signal_id) {
+    if (actionType === 'chart') {
+      return `${self.location.origin}/?chart=${data.signal_id}`;
+    }
+    return `${self.location.origin}/(tabs)/signals?id=${data.signal_id}`;
+  }
+  
+  // Default to home
+  return self.location.origin;
+}
 
 // Handle push subscription changes
 self.addEventListener('pushsubscriptionchange', (event) => {

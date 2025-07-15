@@ -1,4 +1,11 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.50.0';
+import { 
+  createSignalNotification, 
+  createAchievementNotification, 
+  createMarketUpdateNotification,
+  createRichFCMMessage,
+  getDefaultActions 
+} from './richNotifications.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,6 +22,15 @@ interface PushNotificationPayload {
   data?: any;
   target_user?: string;
   target_device_ids?: string[];
+  rich_content?: {
+    image?: string;
+    actions?: Array<{ action: string; title: string; icon?: string }>;
+    deep_link?: {
+      type: string;
+      id?: string;
+      params?: Record<string, string>;
+    };
+  };
 }
 
 interface FCMv1Message {
@@ -170,59 +186,8 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
 
     // Send to each token individually (FCM v1 doesn't support batch sending)
     for (const token of tokens) {
-      const message: FCMv1Message = {
-        message: {
-          token: token,
-          notification: {
-            title: notification.title,
-            body: notification.message,
-          },
-          data: {
-            ...notification.data,
-            notification_id: notification.id,
-            click_action: 'NOTIFICATION_CLICKED',
-          },
-          webpush: {
-            headers: {
-              TTL: '86400', // 24 hours
-              image: 'https://static.vecteezy.com/system/resources/previews/005/076/592/non_2x/hacker-mascot-for-sports-and-esports-logo-free-vector.jpg', // ✅ Add this field with a valid image URL
-            },
-            notification: {
-              icon: '/assets/images/icon.png',
-              badge: '/assets/images/icon.png',
-              click_action: '/',
-            },
-            fcm_options: {
-              link: '/',
-            },
-          },
-          android: {
-            notification: {
-              icon: 'ic_notification', // ✅ Should match a drawable asset in `android/app/src/main/res/drawable/`
-              color: '#31954b',
-              sound: 'default',
-              image: 'https://static.vecteezy.com/system/resources/previews/005/076/592/non_2x/hacker-mascot-for-sports-and-esports-logo-free-vector.jpg', // ✅ Add this field with a valid image URL
-              click_action: 'NOTIFICATION_CLICKED',
-            },
-            data: {
-              ...notification.data,
-              notification_id: notification.id,
-            },
-          },
-          apns: {
-            payload: {
-              aps: {
-                alert: {
-                  title: notification.title,
-                  body: notification.message,
-                },
-                sound: 'default',
-                badge: 1,
-              },
-            },
-          },
-        },
-      };
+      // Create rich FCM message
+      const message = createRichFCMMessage(token, notification, notification.id);
 
       try {
         const response = await fetch(
@@ -284,6 +249,148 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
       success: false,
       error: error.message,
     };
+  }
+}
+
+// Rich notification helper functions
+function createRichFCMMessage(token: string, notification: any, notificationId: string): FCMv1Message {
+  const richContent = notification.rich_content || {};
+  const deepLinkUrl = richContent.deep_link ? generateDeepLink(richContent.deep_link) : undefined;
+  
+  // Get default actions if none provided
+  const actions = richContent.actions || getDefaultActions(notification.type);
+  
+  return {
+    message: {
+      token: token,
+      notification: {
+        title: notification.title,
+        body: notification.message,
+        image: richContent.image,
+      },
+      data: {
+        notification_id: notificationId,
+        deep_link: deepLinkUrl || '',
+        click_action: 'NOTIFICATION_CLICKED',
+        ...notification.data,
+      },
+      webpush: {
+        headers: {
+          TTL: '86400',
+          Urgency: 'high',
+        },
+        notification: {
+          icon: '/assets/images/icon.png',
+          badge: '/assets/images/icon.png',
+          image: richContent.image,
+          requireInteraction: true,
+          actions: actions.map(action => ({
+            action: action.action,
+            title: action.title,
+            icon: action.icon || '/assets/images/icon.png',
+          })),
+        },
+        fcm_options: {
+          link: deepLinkUrl || '/',
+        },
+      },
+      android: {
+        notification: {
+          icon: 'ic_notification',
+          color: '#31954b',
+          sound: 'default',
+          click_action: 'NOTIFICATION_CLICKED',
+          image: richContent.image,
+          channel_id: 'trading_signals',
+        },
+        data: {
+          notification_id: notificationId,
+          deep_link: deepLinkUrl || '',
+          ...notification.data,
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            alert: {
+              title: notification.title,
+              body: notification.message,
+            },
+            sound: 'default',
+            badge: 1,
+            category: getCategoryForType(notification.type),
+            'mutable-content': 1,
+          },
+          notification_id: notificationId,
+          deep_link: deepLinkUrl || '',
+          ...notification.data,
+        },
+      },
+    },
+  };
+}
+
+function generateDeepLink(deepLinkData: any): string {
+  let url = `myapp://${deepLinkData.type}`;
+  
+  if (deepLinkData.id) {
+    url += `/${deepLinkData.id}`;
+  }
+  
+  if (deepLinkData.params) {
+    const paramPairs = Object.entries(deepLinkData.params).flat();
+    if (paramPairs.length > 0) {
+      url += `/${paramPairs.join('/')}`;
+    }
+  }
+  
+  return url;
+}
+
+function getCategoryForType(type: string): string {
+  switch (type) {
+    case 'signal':
+      return 'TRADING_SIGNAL';
+    case 'achievement':
+      return 'ACHIEVEMENT';
+    default:
+      return 'DEFAULT';
+  }
+}
+
+function getDefaultActions(type: string): Array<{ action: string; title: string; icon?: string }> {
+  switch (type) {
+    case 'signal':
+      return [
+        { action: 'view', title: '📈 View Signal' },
+        { action: 'open_chart', title: '📊 Chart' },
+        { action: 'dismiss', title: '❌ Dismiss' },
+      ];
+    
+    case 'achievement':
+      return [
+        { action: 'view', title: '🏆 View' },
+        { action: 'share', title: '📤 Share' },
+        { action: 'dismiss', title: '❌ Dismiss' },
+      ];
+    
+    case 'announcement':
+      return [
+        { action: 'view', title: '📖 Read More' },
+        { action: 'dismiss', title: '❌ Dismiss' },
+      ];
+    
+    case 'alert':
+      return [
+        { action: 'view', title: '⚠️ View Alert' },
+        { action: 'dismiss', title: '❌ Dismiss' },
+      ];
+    
+    default:
+      return [
+        { action: 'view', title: '👀 View' },
+        { action: 'dismiss', title: '❌ Dismiss' },
+      ];
   }
 }
 
