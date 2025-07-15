@@ -22,17 +22,25 @@ export default {
     package: 'com.safikumar00.boltexponativewind',
     googleServicesFile: './google-services.json',
     versionCode: 1,
-    icon: './assets/images/icon.png', // required for push icon
+    icon: './assets/images/ic_notification.png', // required for push icon
     adaptiveIcon: {
       foregroundImage: './assets/images/icon.png',
       backgroundColor: '#FFFFFF',
     },
     notification: {
-      icon: './assets/images/icon.png', // small monochrome
+      icon: './assets/images/ic_notification.png', // small monochrome
       color: '#FF0000', // optional accent color
     },
   },
-  plugins: ['expo-notifications'],
+  plugins: [
+    [
+      'expo-notifications',
+      {
+        icon: './assets/images/ic_notification.png',
+        color: '#FF0000',
+      },
+    ],
+  ],
   extra: {
     eas: {
       projectId: '8ce373b5-978a-43ad-a4cb-3ad8feb6e149',

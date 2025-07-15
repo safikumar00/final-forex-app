@@ -28,7 +28,7 @@ messaging.onBackgroundMessage((payload) => {
   // Check if this is a silent notification
   if (data?.silent === 'true' || data?.type?.includes('background')) {
     console.log('🔇 Processing silent notification in background');
-    
+
     // Send message to main app for silent processing
     self.clients.matchAll().then((clients) => {
       clients.forEach((client) => {
@@ -44,25 +44,32 @@ messaging.onBackgroundMessage((payload) => {
   }
 
   // For non-silent notifications, show normal notification
-  const notificationTitle = payload.notification?.title || data?.title || 'Trading Signal';
+  const notificationTitle =
+    payload.notification?.title || data?.title || 'Trading Signal';
   const notificationOptions = {
-    body: payload.notification?.body || data?.message || 'New trading opportunity available',
-    icon: '/assets/images/icon.png',
-    badge: '/assets/images/icon.png',
+    body:
+      payload.notification?.body ||
+      data?.message ||
+      'New trading opportunity available',
+    icon: 'https://easyappicon.com/image/adaptive-icon.svg',
+    badge: 'https://easyappicon.com/image/adaptive-icon.svg',
     data: data,
     tag: data?.type || 'default',
     requireInteraction: data?.type === 'signal',
-    actions: data?.type === 'signal' ? [
-      {
-        action: 'view',
-        title: 'View Signal',
-        icon: '/assets/images/icon.png'
-      },
-      {
-        action: 'dismiss',
-        title: 'Dismiss'
-      }
-    ] : undefined,
+    actions:
+      data?.type === 'signal'
+        ? [
+            {
+              action: 'view',
+              title: 'View Signal',
+              icon: 'https://easyappicon.com/image/adaptive-icon.svg',
+            },
+            {
+              action: 'dismiss',
+              title: 'Dismiss',
+            },
+          ]
+        : undefined,
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
@@ -80,53 +87,69 @@ self.addEventListener('notificationclick', (event) => {
   // Log notification click event if we have the required data
   if (data?.notification_id && data?.user_id) {
     console.log('📊 Logging notification click event');
-    
+
     // Log the click event (fire and forget - don't block the main action)
-    fetch(`${self.location.origin.replace('localhost:8081', 'govngwsrefzqnuczhzdi.supabase.co')}/functions/v1/log-notification-event`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        notification_id: data.notification_id,
-        user_id: data.user_id,
-        event_type: 'clicked',
-      }),
-    }).then(response => {
-      if (response.ok) {
-        console.log('✅ Notification click logged successfully');
-      } else {
-        console.warn('⚠️ Failed to log notification click:', response.status);
+    fetch(
+      `${self.location.origin.replace(
+        'localhost:8081',
+        'govngwsrefzqnuczhzdi.supabase.co'
+      )}/functions/v1/log-notification-event`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notification_id: data.notification_id,
+          user_id: data.user_id,
+          event_type: 'clicked',
+        }),
       }
-    }).catch(err => {
-      console.error('⚠️ Error logging notification click:', err);
-    });
+    )
+      .then((response) => {
+        if (response.ok) {
+          console.log('✅ Notification click logged successfully');
+        } else {
+          console.warn('⚠️ Failed to log notification click:', response.status);
+        }
+      })
+      .catch((err) => {
+        console.error('⚠️ Error logging notification click:', err);
+      });
   }
 
   // Log notification click event if we have the required data
   if (data?.notification_id && data?.user_id) {
     console.log('📊 Logging notification click event');
-    
+
     // Log the click event (fire and forget - don't block the main action)
-    fetch(`${self.location.origin.replace('localhost:8081', 'govngwsrefzqnuczhzdi.supabase.co')}/functions/v1/log-notification-event`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        notification_id: data.notification_id,
-        user_id: data.user_id,
-        event_type: 'clicked',
-      }),
-    }).then(response => {
-      if (response.ok) {
-        console.log('✅ Notification click logged successfully');
-      } else {
-        console.warn('⚠️ Failed to log notification click:', response.status);
+    fetch(
+      `${self.location.origin.replace(
+        'localhost:8081',
+        'govngwsrefzqnuczhzdi.supabase.co'
+      )}/functions/v1/log-notification-event`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notification_id: data.notification_id,
+          user_id: data.user_id,
+          event_type: 'clicked',
+        }),
       }
-    }).catch(err => {
-      console.error('⚠️ Error logging notification click:', err);
-    });
+    )
+      .then((response) => {
+        if (response.ok) {
+          console.log('✅ Notification click logged successfully');
+        } else {
+          console.warn('⚠️ Failed to log notification click:', response.status);
+        }
+      })
+      .catch((err) => {
+        console.error('⚠️ Error logging notification click:', err);
+      });
   }
 
   // Handle different actions
@@ -140,10 +163,10 @@ self.addEventListener('notificationclick', (event) => {
             return client.focus();
           }
         }
-        
+
         // Open new window if app is not open
         if (self.clients.openWindow) {
-          const url = data?.signal_id 
+          const url = data?.signal_id
             ? `${self.location.origin}/signals?id=${data.signal_id}`
             : self.location.origin;
           return self.clients.openWindow(url);
@@ -159,7 +182,7 @@ self.addEventListener('notificationclick', (event) => {
 // Handle push subscription changes
 self.addEventListener('pushsubscriptionchange', (event) => {
   console.log('🔄 Push subscription changed:', event);
-  
+
   // Handle subscription renewal if needed
   event.waitUntil(
     // You could implement subscription renewal logic here
@@ -182,7 +205,7 @@ self.addEventListener('activate', (event) => {
 // Handle messages from main app
 self.addEventListener('message', (event) => {
   console.log('📨 Message received in service worker:', event.data);
-  
+
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
