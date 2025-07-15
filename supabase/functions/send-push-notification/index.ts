@@ -180,11 +180,12 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
           data: {
             ...notification.data,
             notification_id: notification.id,
-            click_action: 'FLUTTER_NOTIFICATION_CLICK',
+            click_action: 'NOTIFICATION_CLICKED',
           },
           webpush: {
             headers: {
               TTL: '86400', // 24 hours
+              image: 'https://static.vecteezy.com/system/resources/previews/005/076/592/non_2x/hacker-mascot-for-sports-and-esports-logo-free-vector.jpg', // ✅ Add this field with a valid image URL
             },
             notification: {
               icon: '/assets/images/icon.png',
@@ -201,7 +202,7 @@ async function sendFCMv1Notification(tokens: string[], notification: any): Promi
               color: '#31954b',
               sound: 'default',
               image: 'https://static.vecteezy.com/system/resources/previews/005/076/592/non_2x/hacker-mascot-for-sports-and-esports-logo-free-vector.jpg', // ✅ Add this field with a valid image URL
-              click_action: 'FLUTTER_NOTIFICATION_CLICK',
+              click_action: 'NOTIFICATION_CLICKED',
             },
             data: {
               ...notification.data,

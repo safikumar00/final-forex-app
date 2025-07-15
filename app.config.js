@@ -44,6 +44,7 @@ export default {
   extra: {
     eas: {
       projectId: '8ce373b5-978a-43ad-a4cb-3ad8feb6e149',
+      owner: 'safikumar00',
     },
   },
 };
