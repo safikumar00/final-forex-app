@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { logNotificationClick, logNotificationImpression } from './clickTracking';
 import { parseDeepLink, handleDeepLink, initializeDeepLinking } from './deepLinking';
-import { createRichFCMMessage, RichNotificationData } from './richNotifications';
+import { RichNotificationData } from './rich Notifications';
 import { getCurrentDeviceId } from './core';
 
 // Enhanced notification response handler
@@ -98,71 +98,6 @@ export function setupEnhancedNotificationHandlers() {
   };
 }
 
-// Send enhanced push notification
-export async function sendEnhancedPushNotification(
-  tokens: string[],
-  richNotification: RichNotificationData,
-  notificationId: string
-): Promise<{ success: boolean; results?: any; error?: string }> {
-  try {
-    console.log('📤 Sending enhanced push notification to', tokens.length, 'tokens');
-    
-    const results = [];
-    
-    // Send to each token with rich content
-    for (const token of tokens) {
-      try {
-        const message = createRichFCMMessage(token, richNotification, notificationId);
-        
-        // Here you would send via your FCM v1 API
-        // This integrates with your existing send-push-notification function
-        console.log('📨 Enhanced message prepared for token:', token.substring(0, 20) + '...');
-        console.log('🎨 Rich content:', {
-          title: richNotification.title,
-          hasImage: !!richNotification.image,
-          actionsCount: richNotification.actions?.length || 0,
-          hasDeepLink: !!richNotification.deepLink,
-        });
-        
-        results.push({
-          token: token.substring(0, 20) + '...',
-          success: true,
-          enhanced: true,
-        });
-      } catch (error) {
-        console.error('❌ Error preparing enhanced message for token:', error);
-        results.push({
-          token: token.substring(0, 20) + '...',
-          success: false,
-          error: error.message,
-        });
-      }
-    }
-    
-    const successCount = results.filter(r => r.success).length;
-    
-    return {
-      success: successCount > 0,
-      results: {
-        total_prepared: successCount,
-        total_failed: results.length - successCount,
-        enhanced_features: {
-          rich_content: true,
-          actions: richNotification.actions?.length || 0,
-          deep_linking: !!richNotification.deepLink,
-          image: !!richNotification.image,
-        },
-        details: results,
-      },
-    };
-  } catch (error) {
-    console.error('❌ Error in sendEnhancedPushNotification:', error);
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-}
 
 // Create notification categories for iOS
 export async function setupNotificationCategories(): Promise<void> {

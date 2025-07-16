@@ -26,24 +26,43 @@ export async function logNotificationClick(data: Omit<NotificationClickData, 'cl
     console.log('📊 Logging notification click:', clickData);
     
     // Insert into notification_clicks table
-    const { error: clickError } = await supabase
+    const { error } = await supabase
       .from('notification_clicks')
-      .insert(clickData);
+      .insert({
+        notification_id: clickData.notification_id,
+        user_id: clickData.user_id,
+        action: clickData.action_type,
+        clicked_at: clickData.clicked_at,
+        platform: clickData.platform,
+        deep_link: clickData.deep_link,
+      });
     
-    if (clickError) {
-      console.error('❌ Error logging notification click:', clickError);
+    if (error) {
+      console.error('❌ Error logging notification click:', error);
       return false;
     }
     
     // Update notification statistics
-    const { error: updateError } = await supabase.rpc('increment_notification_click_count', {
+    const { error: rpcError } = await supabase.rpc('increment_notification_click_count', {
       p_notification_id: data.notification_id,
       p_action_type: data.action_type
     });
     
-    if (updateError) {
-      console.error('❌ Error updating notification stats:', updateError);
+    if (rpcError) {
+      console.error('❌ Error updating notification stats:', rpcError);
       // Don't return false here - the click was logged successfully
+    }
+    
+    // Add user to clicked list if it's a click action
+    if (data.action_type === 'clicked' || data.action_type === 'view') {
+      const { error: userError } = await supabase.rpc('add_user_to_clicked_list', {
+        p_notification_id: data.notification_id,
+        p_user_id: clickData.user_id
+      });
+      
+      if (userError) {
+        console.error('❌ Error adding user to clicked list:', userError);
+      }
     }
     
     console.log('✅ Notification click logged successfully');

@@ -13,6 +13,8 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { setupEnhancedNotificationHandlers, setupNotificationCategories } from '@/lib/notifications/enhancedPush';
+import { requestNotificationPermissionIfNeeded } from '@/lib/notifications/permissions';
+import { Platform } from 'react-native';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -32,6 +34,11 @@ export default function RootLayout() {
     async function prepare() {
       try {
         console.log('🚀 App initializing...');
+        
+        // Request notification permissions on app startup (Android/iOS only)
+        if (Platform.OS !== 'web') {
+          await requestNotificationPermissionIfNeeded();
+        }
         
         // Setup enhanced notification handling
         const cleanupNotifications = setupEnhancedNotificationHandlers();

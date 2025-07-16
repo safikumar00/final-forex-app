@@ -6,3 +6,7 @@ export * from './firebase';
 export * from './silent';
 export * from './permissions';
 export * from './analytics';
+export * from './clickTracking';
+export * from './deepLinking';
+export * from './richNotifications';
+export * from './enhancedPush';
